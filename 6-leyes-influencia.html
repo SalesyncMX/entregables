@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Las 6 Leyes de la Influencia — Salesync</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --purple: #605FEF;
+    --purple-light: #7B7AF5;
+    --purple-dim: rgba(96, 95, 239, 0.12);
+    --purple-glow: rgba(96, 95, 239, 0.25);
+    --bg: #0C0C0C;
+    --surface: #22212F;
+    --surface-2: #1A1928;
+    --text: #FAF8FF;
+    --text-muted: #9997B8;
+    --border: rgba(96, 95, 239, 0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    padding: 60px 40px 80px;
+    max-width: 860px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .logo-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--purple-dim);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--purple-light);
+    margin-bottom: 40px;
+  }
+
+  .logo-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--purple);
+    border-radius: 50%;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+
+  h1 span {
+    color: var(--purple-light);
+  }
+
+  .subtitle {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    max-width: 560px;
+    margin: 0 auto;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    line-height: 1.7;
+  }
+
+  .author-note {
+    margin-top: 28px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+  }
+
+  .author-note strong {
+    color: var(--purple-light);
+  }
+
+  /* DIVIDER */
+  .divider {
+    width: 1px;
+    height: 60px;
+    background: linear-gradient(to bottom, transparent, var(--border), transparent);
+    margin: 0 auto 60px;
+  }
+
+  /* CARDS */
+  .cards {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px 44px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+    margin-bottom: 16px;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--purple), transparent);
+    opacity: 0.6;
+  }
+
+  .card-number {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--purple);
+    margin-bottom: 10px;
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.015em;
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+
+  .card-original {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 20px;
+    letter-spacing: 0.01em;
+  }
+
+  .card-body {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.97rem;
+    color: #C8C6E8;
+    line-height: 1.75;
+    margin-bottom: 24px;
+  }
+
+  .example-box {
+    background: var(--surface);
+    border-left: 3px solid var(--purple);
+    border-radius: 0 10px 10px 0;
+    padding: 18px 22px;
+    margin-top: 8px;
+  }
+
+  .example-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--purple-light);
+    margin-bottom: 8px;
+  }
+
+  .example-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    color: #B0AECE;
+    line-height: 1.7;
+  }
+
+  /* FOOTER */
+  footer {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    padding-top: 40px;
+  }
+
+  .footer-logo {
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .footer-logo span {
+    color: var(--purple-light);
+  }
+
+  .footer-text {
+    font-size: 0.8rem;
+    color: #5A5878;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  @media (max-width: 600px) {
+    header { padding: 40px 20px 60px; }
+    .card { padding: 28px 24px; }
+    .cards { padding: 0 16px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-tag">
+    <span class="logo-dot"></span>
+    Salesync · Documento interno
+  </div>
+  <h1>Las 6 Leyes que hacen<br>que la gente <span>diga que sí</span></h1>
+  <p class="subtitle">Robert Cialdini pasó años estudiando cómo funciona la influencia. Esto es lo que encontró — aplicado a cómo vendes, presentas y convences.</p>
+  <p class="author-note">Basado en <strong>Influence</strong> de Robert B. Cialdini · Adaptación Salesync</p>
+</header>
+
+<div class="divider"></div>
+
+<div class="cards">
+
+  <!-- LEY 1 -->
+  <div class="card">
+    <div class="card-number">Ley 01</div>
+    <div class="card-title">La Ley del Favor Pendiente</div>
+    <div class="card-original">Reciprocidad en el original</div>
+    <div class="card-body">
+      Cuando alguien te da algo de valor — aunque sea pequeño — siente una deuda psicológica automática. No es conscientemente calculado. Es instinto humano. Dale a tu prospecto algo genuinamente útil antes de pedirle nada, y habrás activado una de las fuerzas más poderosas de la psicología de ventas.
+    </div>
+    <div class="example-box">
+      <div class="example-label">Ejemplo de negocio</div>
+      <div class="example-text">Una agencia de marketing regala un diagnóstico gratuito de 20 minutos donde muestra exactamente qué está fallando en las campañas del prospecto. Cuando llega el momento de hacer la propuesta, la persona ya siente que "le debe algo" y la conversación cambia completamente.</div>
+    </div>
+  </div>
+
+  <!-- LEY 2 -->
+  <div class="card">
+    <div class="card-number">Ley 02</div>
+    <div class="card-title">La Ley de la Palabra Dada</div>
+    <div class="card-original">Compromiso y coherencia en el original</div>
+    <div class="card-body">
+      Una vez que alguien se compromete con algo — por pequeño que sea — hará lo que sea para actuar de forma coherente con esa decisión. La gente no quiere verse como inconsistente. Esto significa que si logras un primer "sí" chico, el "sí" grande viene con mucho menos fricción.
+    </div>
+    <div class="example-box">
+      <div class="example-label">Ejemplo de negocio</div>
+      <div class="example-text">Un coach de ventas pide al prospecto que responda un formulario de diagnóstico de 5 preguntas antes de la llamada. Al hacerlo, el prospecto ya se autoidentificó con el problema y se comprometió a querer resolverlo — entrando a la llamada en modo comprador, no modo escéptico.</div>
+    </div>
+  </div>
+
+  <!-- LEY 3 -->
+  <div class="card">
+    <div class="card-number">Ley 03</div>
+    <div class="card-title">La Ley del Efecto Manada</div>
+    <div class="card-original">Prueba social en el original</div>
+    <div class="card-body">
+      Cuando no estamos seguros de qué hacer, miramos lo que hacen los demás — especialmente si son personas como nosotros. En ventas, esto se traduce en que los casos de éxito, testimonios y números reales valen más que cualquier argumento que puedas dar por tu cuenta.
+    </div>
+    <div class="example-box">
+      <div class="example-label">Ejemplo de negocio</div>
+      <div class="example-text">Un SaaS para restaurantes en lugar de decir "somos la mejor solución" muestra en su landing: "312 restaurantes en México ya automatizaron su gestión de mesas con nosotros." Ese número hace el trabajo de convencer sin que el vendedor tenga que decir nada.</div>
+    </div>
+  </div>
+
+  <!-- LEY 4 -->
+  <div class="card">
+    <div class="card-number">Ley 04</div>
+    <div class="card-title">La Ley del Imán de Autoridad</div>
+    <div class="card-original">Autoridad en el original</div>
+    <div class="card-body">
+      Las personas siguen a quienes perciben como expertos. No es manipulación — es lógica evolutiva. Si alguien sabe más que tú sobre algo que te importa, tiene sentido escucharle. Tu trabajo no es sólo ser bueno en lo que haces, sino hacer visible esa expertise antes de que llegue a la conversación de venta.
+    </div>
+    <div class="example-box">
+      <div class="example-label">Ejemplo de negocio</div>
+      <div class="example-text">Un consultor financiero publica cada semana un análisis breve en LinkedIn sobre errores comunes en la declaración de impuestos de PyMEs. Cuando llega a una llamada de ventas, el prospecto ya lo ve como referencia — no como un vendedor más. La venta ya está medio hecha.</div>
+    </div>
+  </div>
+
+  <!-- LEY 5 -->
+  <div class="card">
+    <div class="card-number">Ley 05</div>
+    <div class="card-title">La Ley del Acceso Exclusivo</div>
+    <div class="card-original">Escasez en el original</div>
+    <div class="card-body">
+      Lo que es limitado se percibe como más valioso. No porque sea mejor — sino porque el cerebro entiende escasez como una señal de que algo vale la pena. Cuando algo puede desaparecer, actuar se vuelve urgente. Ojo: esta ley sólo funciona si la escasez es real. La escasez falsa destruye confianza.
+    </div>
+    <div class="example-box">
+      <div class="example-label">Ejemplo de negocio</div>
+      <div class="example-text">Una agencia acepta máximo 8 clientes al mismo tiempo porque así garantiza atención personalizada. En la llamada de ventas no lo venden como un beneficio — simplemente lo explican como una realidad operativa. El prospecto que quiere entrar siente que necesita decidir rápido antes de que el cupo se llene.</div>
+    </div>
+  </div>
+
+  <!-- LEY 6 -->
+  <div class="card">
+    <div class="card-number">Ley 06</div>
+    <div class="card-title">La Ley de la Química Real</div>
+    <div class="card-original">Simpatía en el original</div>
+    <div class="card-body">
+      Le compramos a quien nos cae bien. Siempre. Antes de evaluar el producto, el precio o la propuesta, el cerebro ya decidió si confía en la persona que tiene enfrente. Similitud, genuinidad y atención real son los activadores de esta ley. No se puede fingir — se nota.
+    </div>
+    <div class="example-box">
+      <div class="example-label">Ejemplo de negocio</div>
+      <div class="example-text">Un vendedor de software B2B antes de hablar de su producto pregunta sobre los dolores específicos del prospecto, menciona un caso similar que resolvió, y hace referencia a algo concreto del sector del cliente. En 10 minutos generó más confianza que un deck de 30 diapositivas. La gente compra a personas, no a empresas.</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-logo">Sales<span>sync</span></div>
+  <div class="footer-text">salesync.mx · Sistemas de ventas para negocios que quieren crecer sin caos</div>
+</footer>
+
+</body>
+</html>
