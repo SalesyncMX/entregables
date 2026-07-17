@@ -128,7 +128,9 @@
             giroId: null,
             giroExpanded: true,
             precio: null,
+            precioLocked: false,
             metaIngresos: null,
+            metaLocked: false,
             cierre: 10,
             cpl: 40,
         };
@@ -221,6 +223,104 @@
             `;
         }
 
+        function lockedFieldHtml(label, value, onCambiar) {
+            return `
+                <label class="block text-sm font-medium text-crema/70 mb-2">${label}</label>
+                <div class="flex items-center justify-between gap-3 p-3 rounded-lg border-2 border-ambar/50 bg-gradient-to-r from-ambar/10 to-cobre/10">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="flex-none w-6 h-6 rounded-full bg-cobre text-crema flex items-center justify-center text-xs">✓</span>
+                        <span class="text-lg font-semibold text-crema truncate">${value}</span>
+                    </div>
+                    <button type="button" onclick="${onCambiar}"
+                        class="flex-none text-xs font-medium px-3 py-2 rounded-lg bg-noche border border-white/15 text-crema/80 hover:border-ambar/60 hover:text-ambar transition">
+                        Cambiar
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderPrecioField(focus) {
+            const el = document.getElementById("precio-field");
+
+            if (state.precioLocked && state.precio) {
+                el.innerHTML = lockedFieldHtml("Ticket promedio de tu producto o servicio", formatMoney(state.precio), "unlockPrecio()");
+                return;
+            }
+
+            el.innerHTML = `
+                <label class="block text-sm font-medium text-crema/70 mb-2">Ticket promedio de tu producto o servicio</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-crema/30">$</span>
+                    <input id="input-precio" type="number" min="0" placeholder="3,000"
+                        class="w-full pl-7 pr-3 py-3 bg-noche/50 border-2 border-white/15 rounded-lg text-crema focus:border-ambar focus:outline-none text-lg font-semibold placeholder:text-crema/25" />
+                </div>
+            `;
+            const input = document.getElementById("input-precio");
+            if (state.precio) input.value = state.precio;
+            input.addEventListener("input", onInputsChange);
+            input.addEventListener("blur", lockPrecio);
+            input.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") { e.preventDefault(); input.blur(); }
+            });
+            if (focus) input.focus();
+        }
+
+        function lockPrecio() {
+            if (!state.precio || state.precio <= 0) return;
+            state.precioLocked = true;
+            renderPrecioField();
+        }
+
+        function unlockPrecio() {
+            state.precioLocked = false;
+            renderPrecioField(true);
+        }
+
+        function renderMetaField(focus) {
+            const el = document.getElementById("meta-field");
+
+            if (state.metaLocked && state.metaIngresos) {
+                el.innerHTML = lockedFieldHtml("¿Cuánto quieres facturar al mes?", formatMoney(state.metaIngresos), "unlockMeta()");
+                return;
+            }
+
+            el.innerHTML = `
+                <label class="block text-sm font-medium text-crema/70 mb-2">¿Cuánto quieres facturar al mes?</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-crema/30">$</span>
+                    <input id="input-meta" type="number" min="0" placeholder="50,000"
+                        class="w-full pl-7 pr-3 py-3 bg-noche/50 border-2 border-white/15 rounded-lg text-crema focus:border-ambar focus:outline-none text-lg font-semibold placeholder:text-crema/25" />
+                </div>
+                <div class="flex gap-2 mt-2">
+                    ${[30000, 50000, 100000, 200000].map((v) => `
+                        <button type="button" onclick="setMetaPreset(${v})"
+                            class="text-xs px-2.5 py-1 rounded-full bg-white/5 text-crema/60 hover:bg-ambar/15 hover:text-ambar transition">
+                            $${v.toLocaleString("es-MX")}
+                        </button>
+                    `).join("")}
+                </div>
+            `;
+            const input = document.getElementById("input-meta");
+            if (state.metaIngresos) input.value = state.metaIngresos;
+            input.addEventListener("input", onInputsChange);
+            input.addEventListener("blur", lockMeta);
+            input.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") { e.preventDefault(); input.blur(); }
+            });
+            if (focus) input.focus();
+        }
+
+        function lockMeta() {
+            if (!state.metaIngresos || state.metaIngresos <= 0) return;
+            state.metaLocked = true;
+            renderMetaField();
+        }
+
+        function unlockMeta() {
+            state.metaLocked = false;
+            renderMetaField(true);
+        }
+
         function syncSliders() {
             const cierreInput = document.getElementById("slider-cierre");
             const cplInput = document.getElementById("slider-cpl");
@@ -310,16 +410,23 @@
         }
 
         function onInputsChange() {
-            const precioVal = parseFloat(document.getElementById("input-precio").value);
-            const metaVal = parseFloat(document.getElementById("input-meta").value);
-            state.precio = isNaN(precioVal) ? null : precioVal;
-            state.metaIngresos = isNaN(metaVal) ? null : metaVal;
+            const precioInput = document.getElementById("input-precio");
+            const metaInput = document.getElementById("input-meta");
+            if (precioInput) {
+                const precioVal = parseFloat(precioInput.value);
+                state.precio = isNaN(precioVal) ? null : precioVal;
+            }
+            if (metaInput) {
+                const metaVal = parseFloat(metaInput.value);
+                state.metaIngresos = isNaN(metaVal) ? null : metaVal;
+            }
             renderResultados();
         }
 
         function setMetaPreset(valor) {
             document.getElementById("input-meta").value = valor;
             onInputsChange();
+            lockMeta();
         }
 
         function renderApp() {
@@ -346,30 +453,8 @@
                 <div class="bg-surface rounded-2xl border border-ambar/20 p-6 md:p-8">
                     <h2 class="text-lg font-bold text-crema mb-4">2. Tus números</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-crema/70 mb-2">Ticket promedio de tu producto o servicio</label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-crema/30">$</span>
-                                <input id="input-precio" type="number" min="0" placeholder="3,000"
-                                    class="w-full pl-7 pr-3 py-3 bg-noche/50 border-2 border-white/15 rounded-lg text-crema focus:border-ambar focus:outline-none text-lg font-semibold placeholder:text-crema/25" />
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-crema/70 mb-2">¿Cuánto quieres facturar al mes?</label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-crema/30">$</span>
-                                <input id="input-meta" type="number" min="0" placeholder="50,000"
-                                    class="w-full pl-7 pr-3 py-3 bg-noche/50 border-2 border-white/15 rounded-lg text-crema focus:border-ambar focus:outline-none text-lg font-semibold placeholder:text-crema/25" />
-                            </div>
-                            <div class="flex gap-2 mt-2">
-                                ${[30000, 50000, 100000, 200000].map((v) => `
-                                    <button type="button" onclick="setMetaPreset(${v})"
-                                        class="text-xs px-2.5 py-1 rounded-full bg-white/5 text-crema/60 hover:bg-ambar/15 hover:text-ambar transition">
-                                        $${v.toLocaleString("es-MX")}
-                                    </button>
-                                `).join("")}
-                            </div>
-                        </div>
+                        <div id="precio-field"></div>
+                        <div id="meta-field"></div>
                     </div>
                 </div>
 
@@ -406,9 +491,8 @@
             `;
 
             renderGiroSection();
-
-            document.getElementById("input-precio").addEventListener("input", onInputsChange);
-            document.getElementById("input-meta").addEventListener("input", onInputsChange);
+            renderPrecioField();
+            renderMetaField();
 
             renderResultados();
         }
