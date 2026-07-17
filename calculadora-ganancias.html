@@ -162,6 +162,9 @@
                 presupuestoSemana: presupuestoNecesario / 4.33,
                 leadsDia: leadsNecesarios / 30,
                 presupuestoDia: presupuestoNecesario / 30,
+                ventasAnuales: ventasNecesarias * 12,
+                presupuestoAnual: presupuestoNecesario * 12,
+                ingresoAnual: metaIngresos * 12,
             };
         }
 
@@ -243,46 +246,62 @@
             }
 
             el.innerHTML = `
-                <div class="bg-surface rounded-2xl p-6 md:p-8 border border-ambar/25">
-                    <p class="text-xs font-bold uppercase tracking-widest text-ambar mb-1">Resultado</p>
-                    <h2 class="text-2xl font-display text-crema mb-6">Lo que necesitas cada mes</h2>
+                <div class="space-y-4">
+                    <div class="bg-surface rounded-2xl p-6 md:p-8 border border-ambar/25">
+                        <p class="text-xs font-bold uppercase tracking-widest text-ambar mb-1">Resultado</p>
+                        <h2 class="text-2xl font-display text-crema mb-6">Lo que necesitas cada mes</h2>
 
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div class="bg-noche/50 rounded-xl p-4 border border-white/10">
-                            <p class="text-xs text-crema/50 mb-1">Ventas necesarias</p>
-                            <p class="text-2xl font-bold text-crema">${formatNumber(r.ventasNecesarias)}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div class="bg-noche/50 rounded-xl p-4 border border-white/10">
+                                <p class="text-xs text-crema/50 mb-1">Ventas necesarias</p>
+                                <p class="text-2xl font-bold text-crema">${formatNumber(r.ventasNecesarias)}</p>
+                            </div>
+                            <div class="bg-noche/50 rounded-xl p-4 border border-white/10">
+                                <p class="text-xs text-crema/50 mb-1">Leads necesarios</p>
+                                <p class="text-2xl font-bold text-crema">${formatNumber(r.leadsNecesarios)}</p>
+                            </div>
+                            <div class="bg-ambar rounded-xl p-4">
+                                <p class="text-xs text-noche/70 mb-1">Presupuesto de pauta</p>
+                                <p class="text-2xl font-bold text-noche">${formatMoney(r.presupuestoNecesario)}</p>
+                            </div>
+                            <div class="bg-noche/50 rounded-xl p-4 border border-white/10">
+                                <p class="text-xs text-crema/50 mb-1">ROAS estimado</p>
+                                <p class="text-2xl font-bold text-crema">${r.roas.toFixed(2)}x</p>
+                            </div>
                         </div>
-                        <div class="bg-noche/50 rounded-xl p-4 border border-white/10">
-                            <p class="text-xs text-crema/50 mb-1">Leads necesarios</p>
-                            <p class="text-2xl font-bold text-crema">${formatNumber(r.leadsNecesarios)}</p>
-                        </div>
-                        <div class="bg-ambar rounded-xl p-4">
-                            <p class="text-xs text-noche/70 mb-1">Presupuesto de pauta</p>
-                            <p class="text-2xl font-bold text-noche">${formatMoney(r.presupuestoNecesario)}</p>
-                        </div>
-                        <div class="bg-noche/50 rounded-xl p-4 border border-white/10">
-                            <p class="text-xs text-crema/50 mb-1">ROAS estimado</p>
-                            <p class="text-2xl font-bold text-crema">${r.roas.toFixed(2)}x</p>
+
+                        <div class="pt-6 border-t border-white/10">
+                            <h3 class="font-bold text-crema/60 mb-3 text-sm uppercase tracking-wide">Ritmo de ejecución</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-noche/50 rounded-xl p-4 border border-white/10">
+                                    <p class="text-xs text-crema/40 mb-1">Por semana</p>
+                                    <p class="text-lg font-bold text-crema">${formatNumber(r.leadsSemana)} leads</p>
+                                    <p class="text-sm text-crema/60">${formatMoney(r.presupuestoSemana)}</p>
+                                </div>
+                                <div class="bg-noche/50 rounded-xl p-4 border border-white/10">
+                                    <p class="text-xs text-crema/40 mb-1">Por día</p>
+                                    <p class="text-lg font-bold text-crema">${formatNumber(r.leadsDia)} leads</p>
+                                    <p class="text-sm text-crema/60">${formatMoney(r.presupuestoDia)}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="pt-6 border-t border-white/10">
-                        <h3 class="font-bold text-crema/60 mb-3 text-sm uppercase tracking-wide">Desglosado</h3>
-                        <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="rounded-2xl p-6 md:p-8 bg-gradient-to-br from-cobre to-ambar">
+                        <p class="text-xs font-bold uppercase tracking-widest text-noche/60 mb-1">Si lo sostienes 12 meses</p>
+                        <h3 class="text-xl font-display text-noche mb-5">Proyección anual</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                             <div>
-                                <p class="text-xs text-crema/40 mb-2">Por semana</p>
-                                <p class="text-sm text-crema/80">${formatNumber(r.leadsSemana)} leads</p>
-                                <p class="text-sm text-crema/80">${formatMoney(r.presupuestoSemana)}</p>
+                                <p class="text-xs text-noche/60 mb-1">Ventas</p>
+                                <p class="text-2xl font-bold text-noche">${formatNumber(r.ventasAnuales)}</p>
                             </div>
                             <div>
-                                <p class="text-xs text-crema/40 mb-2">Por día</p>
-                                <p class="text-sm text-crema/80">${formatNumber(r.leadsDia)} leads</p>
-                                <p class="text-sm text-crema/80">${formatMoney(r.presupuestoDia)}</p>
+                                <p class="text-xs text-noche/60 mb-1">Inversión en pauta</p>
+                                <p class="text-2xl font-bold text-noche">${formatMoney(r.presupuestoAnual)}</p>
                             </div>
                             <div>
-                                <p class="text-xs text-crema/40 mb-2">Al año</p>
-                                <p class="text-sm text-crema/80">${formatNumber(r.ventasNecesarias * 12)} ventas</p>
-                                <p class="text-sm text-crema/80">${formatMoney(r.presupuestoNecesario * 12)}</p>
+                                <p class="text-xs text-noche/60 mb-1">Ingresos</p>
+                                <p class="text-3xl font-bold text-noche">${formatMoney(r.ingresoAnual)}</p>
                             </div>
                         </div>
                     </div>
