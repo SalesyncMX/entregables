@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Ganancias — Cheko Armendáriz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        noche: "#0b0d14",
+                        crema: "#f3ece0",
+                        ambar: "#eeb154",
+                        cobre: "#c26a1e",
+                        azul: "#8aa0c8",
+                        surface: "#14161f",
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@1&display=swap');
+
+        body {
+            font-family: 'Archivo', sans-serif;
+            position: relative;
+        }
+
+        .font-display {
+            font-family: 'Archivo Black', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: -0.01em;
+        }
+
+        .accent {
+            font-family: 'Instrument Serif', serif;
+            font-style: italic;
+            text-transform: none;
+            color: #eeb154;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(243, 236, 224, 0.045) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(243, 236, 224, 0.045) 1px, transparent 1px);
+            background-size: 34px 34px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 12% 92%, rgba(194, 106, 30, 0.22), transparent 45%),
+                radial-gradient(circle at 92% 6%, rgba(138, 160, 200, 0.12), transparent 40%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        #app { position: relative; z-index: 1; }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 9999px;
+            background: rgba(238, 177, 84, 0.2);
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 9999px;
+            background: #eeb154;
+            cursor: pointer;
+            border: 3px solid #0b0d14;
+            box-shadow: 0 1px 6px rgba(238, 177, 84, 0.5);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 9999px;
+            background: #eeb154;
+            cursor: pointer;
+            border: 3px solid #0b0d14;
+            box-shadow: 0 1px 6px rgba(238, 177, 84, 0.5);
+        }
+        .giro-card.is-active {
+            border-color: #eeb154;
+            background: linear-gradient(135deg, rgba(238, 177, 84, 0.14) 0%, rgba(194, 106, 30, 0.14) 100%);
+            box-shadow: 0 4px 14px rgba(238, 177, 84, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-noche min-h-screen p-4 md:p-8">
+    <div id="app" class="max-w-5xl mx-auto space-y-6"></div>
+
+    <script>
+        // ---------------------------------------------------------------
+        // Benchmarks de referencia por giro (CPL y tasa de cierre lead→venta).
+        // Basados en promedios generales de Meta Ads 2026 y benchmarks de
+        // ventas por industria. Son un PUNTO DE PARTIDA, no una garantía —
+        // cada quien debe ajustar los sliders según su experiencia real.
+        // ---------------------------------------------------------------
+        const giros = [
+            { id: "coaching", nombre: "Coaching / Cursos online", ejemplo: "infoproductos, mentorías, programas", cierre: 10, cpl: 35 },
+            { id: "ecommerce", nombre: "E-commerce / Tienda online", ejemplo: "productos físicos, tienda en línea", cierre: 20, cpl: 27 },
+            { id: "salud", nombre: "Salud y estética", ejemplo: "clínicas, spa, medicina estética", cierre: 20, cpl: 42 },
+            { id: "fitness", nombre: "Fitness", ejemplo: "gimnasios, entrenadores personales", cierre: 15, cpl: 30 },
+            { id: "inmobiliaria", nombre: "Bienes raíces / Inversiones", ejemplo: "venta o renta de propiedades, fondos de inversión", cierre: 4, cpl: 55 },
+            { id: "profesional", nombre: "Servicios profesionales", ejemplo: "legal, contable, consultoría B2B", cierre: 20, cpl: 60 },
+            { id: "hogar", nombre: "Servicios del hogar", ejemplo: "remodelación, instalaciones, plomería", cierre: 25, cpl: 34 },
+            { id: "restaurantes", nombre: "Restaurantes / F&B", ejemplo: "reservaciones, eventos", cierre: 30, cpl: 25 },
+            { id: "otro", nombre: "Otro / Personalizado", ejemplo: "ajusta los valores manualmente", cierre: 10, cpl: 40 },
+        ];
+
+        const state = {
+            giroId: null,
+            giroExpanded: true,
+            precio: null,
+            metaIngresos: null,
+            cierre: 10,
+            cpl: 40,
+        };
+
+        function formatMoney(num) {
+            if (!isFinite(num)) return "—";
+            return "$" + Math.ceil(num).toLocaleString("es-MX");
+        }
+
+        function formatNumber(num) {
+            if (!isFinite(num)) return "—";
+            return Math.ceil(num).toLocaleString("es-MX");
+        }
+
+        function calcular() {
+            const { precio, metaIngresos, cierre, cpl } = state;
+            if (!precio || precio <= 0 || !metaIngresos || metaIngresos <= 0 || cierre <= 0 || cpl <= 0) {
+                return null;
+            }
+            const ventasNecesarias = metaIngresos / precio;
+            const leadsNecesarios = ventasNecesarias / (cierre / 100);
+            const presupuestoNecesario = leadsNecesarios * cpl;
+            const roas = metaIngresos / presupuestoNecesario;
+            return {
+                ventasNecesarias,
+                leadsNecesarios,
+                presupuestoNecesario,
+                roas,
+                ventasSemana: ventasNecesarias / 4.33,
+                leadsSemana: leadsNecesarios / 4.33,
+                presupuestoSemana: presupuestoNecesario / 4.33,
+                leadsDia: leadsNecesarios / 30,
+                presupuestoDia: presupuestoNecesario / 30,
+            };
+        }
+
+        function selectGiro(id) {
+            const giro = giros.find((g) => g.id === id);
+            if (!giro) return;
+            state.giroId = id;
+            state.cierre = giro.cierre;
+            state.cpl = giro.cpl;
+            state.giroExpanded = false;
+            renderGiroSection();
+            syncSliders();
+            renderResultados();
+        }
+
+        function expandGiro() {
+            state.giroExpanded = true;
+            renderGiroSection();
+        }
+
+        function renderGiroSection() {
+            const el = document.getElementById("giro-section");
+            const giroSeleccionado = giros.find((g) => g.id === state.giroId);
+
+            if (giroSeleccionado && !state.giroExpanded) {
+                el.innerHTML = `
+                    <div class="flex items-center justify-between gap-4 p-4 rounded-xl border-2 border-ambar/50 bg-gradient-to-r from-ambar/10 to-cobre/10">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="flex-none w-8 h-8 rounded-full bg-cobre text-crema flex items-center justify-center text-sm">✓</span>
+                            <div class="min-w-0">
+                                <p class="font-semibold text-sm text-crema truncate">${giroSeleccionado.nombre}</p>
+                                <p class="text-xs text-crema/50 truncate">${giroSeleccionado.ejemplo}</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="expandGiro()"
+                            class="flex-none text-xs font-medium px-3 py-2 rounded-lg bg-noche border border-white/15 text-crema/80 hover:border-ambar/60 hover:text-ambar transition">
+                            Cambiar
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            el.innerHTML = `
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    ${giros.map((g) => `
+                        <button type="button" data-giro-id="${g.id}" onclick="selectGiro('${g.id}')"
+                            class="giro-card text-left p-3 rounded-xl border-2 border-white/10 hover:border-ambar/40 transition bg-noche/40 ${g.id === state.giroId ? "is-active" : ""}">
+                            <p class="font-semibold text-sm text-crema">${g.nombre}</p>
+                            <p class="text-xs text-crema/50 mt-0.5">${g.ejemplo}</p>
+                        </button>
+                    `).join("")}
+                </div>
+            `;
+        }
+
+        function syncSliders() {
+            const cierreInput = document.getElementById("slider-cierre");
+            const cplInput = document.getElementById("slider-cpl");
+            const cierreLabel = document.getElementById("label-cierre");
+            const cplLabel = document.getElementById("label-cpl");
+            cierreInput.value = state.cierre;
+            cplInput.value = state.cpl;
+            cierreLabel.textContent = state.cierre + "%";
+            cplLabel.textContent = formatMoney(state.cpl);
+        }
+
+        function renderResultados() {
+            const el = document.getElementById("resultados");
+            const r = calcular();
+
+            if (!r) {
+                el.innerHTML = `
+                    <div class="bg-surface rounded-2xl p-10 border-2 border-dashed border-white/15 text-center">
+                        <p class="text-crema/40 text-lg">👆 Selecciona tu giro y llena tu ticket promedio + meta de ingresos arriba para ver tu resultado.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            el.innerHTML = `
+                <div class="bg-surface rounded-2xl p-6 md:p-8 border border-ambar/25">
+                    <p class="text-xs font-bold uppercase tracking-widest text-ambar mb-1">Resultado</p>
+                    <h2 class="text-2xl font-display text-crema mb-6">Lo que necesitas cada mes</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-noche/50 rounded-xl p-4 border border-white/10">
+                            <p class="text-xs text-crema/50 mb-1">Ventas necesarias</p>
+                            <p class="text-2xl font-bold text-crema">${formatNumber(r.ventasNecesarias)}</p>
+                        </div>
+                        <div class="bg-noche/50 rounded-xl p-4 border border-white/10">
+                            <p class="text-xs text-crema/50 mb-1">Leads necesarios</p>
+                            <p class="text-2xl font-bold text-crema">${formatNumber(r.leadsNecesarios)}</p>
+                        </div>
+                        <div class="bg-ambar rounded-xl p-4">
+                            <p class="text-xs text-noche/70 mb-1">Presupuesto de pauta</p>
+                            <p class="text-2xl font-bold text-noche">${formatMoney(r.presupuestoNecesario)}</p>
+                        </div>
+                        <div class="bg-noche/50 rounded-xl p-4 border border-white/10">
+                            <p class="text-xs text-crema/50 mb-1">ROAS estimado</p>
+                            <p class="text-2xl font-bold text-crema">${r.roas.toFixed(2)}x</p>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-white/10">
+                        <h3 class="font-bold text-crema/60 mb-3 text-sm uppercase tracking-wide">Desglosado</h3>
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div>
+                                <p class="text-xs text-crema/40 mb-2">Por semana</p>
+                                <p class="text-sm text-crema/80">${formatNumber(r.leadsSemana)} leads</p>
+                                <p class="text-sm text-crema/80">${formatMoney(r.presupuestoSemana)}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-crema/40 mb-2">Por día</p>
+                                <p class="text-sm text-crema/80">${formatNumber(r.leadsDia)} leads</p>
+                                <p class="text-sm text-crema/80">${formatMoney(r.presupuestoDia)}</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-crema/40 mb-2">Al año</p>
+                                <p class="text-sm text-crema/80">${formatNumber(r.ventasNecesarias * 12)} ventas</p>
+                                <p class="text-sm text-crema/80">${formatMoney(r.presupuestoNecesario * 12)}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function onInputsChange() {
+            const precioVal = parseFloat(document.getElementById("input-precio").value);
+            const metaVal = parseFloat(document.getElementById("input-meta").value);
+            state.precio = isNaN(precioVal) ? null : precioVal;
+            state.metaIngresos = isNaN(metaVal) ? null : metaVal;
+            renderResultados();
+        }
+
+        function setMetaPreset(valor) {
+            document.getElementById("input-meta").value = valor;
+            onInputsChange();
+        }
+
+        function renderApp() {
+            const app = document.getElementById("app");
+
+            app.innerHTML = `
+                <!-- Header -->
+                <div class="bg-surface rounded-2xl border border-ambar/20 p-6 md:p-8">
+                    <h1 class="text-2xl md:text-3xl font-display text-crema">Calculadora de <span class="accent normal-case text-3xl md:text-4xl">Ganancias</span></h1>
+                    <p class="text-crema/60 mt-2">
+                        ¿Cuánto necesitas invertir en pauta para lograr la meta de ingresos que quieres?
+                        Elige tu giro, mete tus números y ajusta según tu experiencia real.
+                    </p>
+                </div>
+
+                <!-- Paso 1: Giro -->
+                <div class="bg-surface rounded-2xl border border-ambar/20 p-6 md:p-8">
+                    <h2 class="text-lg font-bold text-crema mb-1">1. ¿Cuál es tu giro?</h2>
+                    <p class="text-sm text-crema/50 mb-4">Esto autocompleta valores promedio de referencia — los puedes ajustar abajo.</p>
+                    <div id="giro-section"></div>
+                </div>
+
+                <!-- Paso 2: Tus números -->
+                <div class="bg-surface rounded-2xl border border-ambar/20 p-6 md:p-8">
+                    <h2 class="text-lg font-bold text-crema mb-4">2. Tus números</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-crema/70 mb-2">Ticket promedio de tu producto o servicio</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-crema/30">$</span>
+                                <input id="input-precio" type="number" min="0" placeholder="3,000"
+                                    class="w-full pl-7 pr-3 py-3 bg-noche/50 border-2 border-white/15 rounded-lg text-crema focus:border-ambar focus:outline-none text-lg font-semibold placeholder:text-crema/25" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-crema/70 mb-2">¿Cuánto quieres facturar al mes?</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-crema/30">$</span>
+                                <input id="input-meta" type="number" min="0" placeholder="50,000"
+                                    class="w-full pl-7 pr-3 py-3 bg-noche/50 border-2 border-white/15 rounded-lg text-crema focus:border-ambar focus:outline-none text-lg font-semibold placeholder:text-crema/25" />
+                            </div>
+                            <div class="flex gap-2 mt-2">
+                                ${[30000, 50000, 100000, 200000].map((v) => `
+                                    <button type="button" onclick="setMetaPreset(${v})"
+                                        class="text-xs px-2.5 py-1 rounded-full bg-white/5 text-crema/60 hover:bg-ambar/15 hover:text-ambar transition">
+                                        $${v.toLocaleString("es-MX")}
+                                    </button>
+                                `).join("")}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paso 3: Sliders -->
+                <div class="bg-surface rounded-2xl border border-ambar/20 p-6 md:p-8">
+                    <h2 class="text-lg font-bold text-crema mb-1">3. Ajusta según tu experiencia</h2>
+                    <p class="text-sm text-crema/50 mb-6">Estos valores arrancan con el promedio de tu giro — cámbialos si ya conoces tus números reales.</p>
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="text-sm font-medium text-crema/70">Tasa de cierre (leads que se vuelven venta)</label>
+                                <span id="label-cierre" class="text-sm font-bold text-ambar">10%</span>
+                            </div>
+                            <input id="slider-cierre" type="range" min="1" max="60" value="10" class="w-full" oninput="onSliderChange()" />
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="text-sm font-medium text-crema/70">Costo por lead (CPL)</label>
+                                <span id="label-cpl" class="text-sm font-bold text-ambar">$40</span>
+                            </div>
+                            <input id="slider-cpl" type="range" min="5" max="200" value="40" class="w-full" oninput="onSliderChange()" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resultados -->
+                <div id="resultados"></div>
+
+                <!-- Nota -->
+                <p class="text-xs text-crema/25 text-center pb-4">
+                    Los valores por defecto de cada giro son promedios generales de referencia (benchmarks de Meta Ads y ventas por industria, 2026),
+                    no un resultado garantizado. Tus resultados reales dependen de tu oferta, tu mercado y tu ejecución.
+                </p>
+            `;
+
+            renderGiroSection();
+
+            document.getElementById("input-precio").addEventListener("input", onInputsChange);
+            document.getElementById("input-meta").addEventListener("input", onInputsChange);
+
+            renderResultados();
+        }
+
+        function onSliderChange() {
+            const cierre = parseInt(document.getElementById("slider-cierre").value, 10);
+            const cpl = parseInt(document.getElementById("slider-cpl").value, 10);
+            state.cierre = cierre;
+            state.cpl = cpl;
+            document.getElementById("label-cierre").textContent = cierre + "%";
+            document.getElementById("label-cpl").textContent = formatMoney(cpl);
+            renderResultados();
+        }
+
+        renderApp();
+    </script>
+</body>
+</html>
