@@ -101,11 +101,6 @@
             box-shadow: 0 4px 14px rgba(238, 177, 84, 0.2);
         }
 
-        .font-figure {
-            font-family: 'Instrument Serif', serif;
-            font-style: italic;
-        }
-
         .glow-card {
             position: relative;
             overflow: hidden;
@@ -401,7 +396,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                             <div class="glow-card bg-ambar rounded-xl p-4">
                                 <p class="text-xs text-noche/70 mb-1">Presupuesto de pauta</p>
-                                <p class="font-figure text-3xl text-noche">${formatMoney(r.presupuestoNecesario)}</p>
+                                <p class="text-2xl font-bold text-noche">${formatMoney(r.presupuestoNecesario)}</p>
                             </div>
                             <div class="bg-noche/50 rounded-xl p-4 border border-white/10">
                                 <p class="text-xs text-crema/50 mb-1">Ventas necesarias</p>
@@ -456,7 +451,7 @@
                             </div>
                             <div>
                                 <p class="text-xs text-noche/60 mb-1">Ingresos</p>
-                                <p class="font-figure text-4xl text-noche">${formatMoney(r.ingresoAnual)}</p>
+                                <p class="text-3xl font-bold text-noche">${formatMoney(r.ingresoAnual)}</p>
                             </div>
                         </div>
                     </div>
