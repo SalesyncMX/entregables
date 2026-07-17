@@ -100,6 +100,53 @@
             background: linear-gradient(135deg, rgba(238, 177, 84, 0.14) 0%, rgba(194, 106, 30, 0.14) 100%);
             box-shadow: 0 4px 14px rgba(238, 177, 84, 0.2);
         }
+
+        .font-figure {
+            font-family: 'Instrument Serif', serif;
+            font-style: italic;
+        }
+
+        .glow-card {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 224, 178, 0.4);
+            box-shadow: 0 10px 34px -10px rgba(238, 177, 84, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .glow-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(11, 13, 20, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(11, 13, 20, 0.07) 1px, transparent 1px);
+            background-size: 22px 22px;
+            pointer-events: none;
+        }
+
+        .glow-card::after {
+            content: '';
+            position: absolute;
+            top: -60%;
+            left: -15%;
+            width: 65%;
+            height: 130%;
+            background: radial-gradient(ellipse, rgba(255, 255, 255, 0.4), transparent 65%);
+            transform: rotate(-14deg);
+            pointer-events: none;
+        }
+
+        .glow-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        summary {
+            list-style: none;
+        }
+        summary::-webkit-details-marker {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-noche min-h-screen p-4 md:p-8">
@@ -352,6 +399,10 @@
                         <h2 class="text-2xl font-display text-crema mb-6">Lo que necesitas cada mes</h2>
 
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div class="glow-card bg-ambar rounded-xl p-4">
+                                <p class="text-xs text-noche/70 mb-1">Presupuesto de pauta</p>
+                                <p class="font-figure text-3xl text-noche">${formatMoney(r.presupuestoNecesario)}</p>
+                            </div>
                             <div class="bg-noche/50 rounded-xl p-4 border border-white/10">
                                 <p class="text-xs text-crema/50 mb-1">Ventas necesarias</p>
                                 <p class="text-2xl font-bold text-crema">${formatNumber(r.ventasNecesarias)}</p>
@@ -360,12 +411,16 @@
                                 <p class="text-xs text-crema/50 mb-1">Leads necesarios</p>
                                 <p class="text-2xl font-bold text-crema">${formatNumber(r.leadsNecesarios)}</p>
                             </div>
-                            <div class="bg-ambar rounded-xl p-4">
-                                <p class="text-xs text-noche/70 mb-1">Presupuesto de pauta</p>
-                                <p class="text-2xl font-bold text-noche">${formatMoney(r.presupuestoNecesario)}</p>
-                            </div>
                             <div class="bg-noche/50 rounded-xl p-4 border border-white/10">
-                                <p class="text-xs text-crema/50 mb-1">ROAS estimado</p>
+                                <div class="flex items-center gap-1.5 mb-1">
+                                    <p class="text-xs text-crema/50">ROAS estimado</p>
+                                    <details class="relative">
+                                        <summary class="w-4 h-4 rounded-full border border-crema/30 text-crema/50 text-[10px] leading-none flex items-center justify-center cursor-pointer hover:border-ambar hover:text-ambar">i</summary>
+                                        <div class="absolute z-10 top-6 right-0 w-52 p-3 rounded-lg bg-surface border border-ambar/30 text-xs leading-relaxed text-crema/70 shadow-xl">
+                                            ROAS = cuánto generas de ingresos por cada peso invertido en pauta. Un ROAS de 8x significa que por cada $1 gastado, regresan $8 en ventas.
+                                        </div>
+                                    </details>
+                                </div>
                                 <p class="text-2xl font-bold text-crema">${r.roas.toFixed(2)}x</p>
                             </div>
                         </div>
@@ -387,7 +442,7 @@
                         </div>
                     </div>
 
-                    <div class="rounded-2xl p-6 md:p-8 bg-gradient-to-br from-cobre to-ambar">
+                    <div class="glow-card rounded-2xl p-6 md:p-8 bg-gradient-to-br from-cobre to-ambar">
                         <p class="text-xs font-bold uppercase tracking-widest text-noche/60 mb-1">Si lo sostienes 12 meses</p>
                         <h3 class="text-xl font-display text-noche mb-5">Proyección anual</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -401,7 +456,7 @@
                             </div>
                             <div>
                                 <p class="text-xs text-noche/60 mb-1">Ingresos</p>
-                                <p class="text-3xl font-bold text-noche">${formatMoney(r.ingresoAnual)}</p>
+                                <p class="font-figure text-4xl text-noche">${formatMoney(r.ingresoAnual)}</p>
                             </div>
                         </div>
                     </div>
